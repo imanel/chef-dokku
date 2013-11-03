@@ -9,35 +9,37 @@ execute "install_dokku" do
   # TODO: Split change to remote file + execute
   command "wget -qO- https://raw.github.com/imanel/dokku/master/bootstrap.sh | bash"
   environment (install_env)
-  not_if { ::File.exists?("/home/git") }
+  not_if { ::File.exists?("/home/dokku") }
 end
 
 if domain = node['dokku']['domain']
-  file '/home/git/VHOST' do
+  file '/home/dokku/VHOST' do
+    owner 'dokku'
+    group 'dokku'
     content domain
   end
 end
 
 if apps = node['dokku']['apps']
   apps.each do |app_name, config|
-    directory "/home/git/#{app_name}" do
-      owner 'git'
-      group 'git'
+    directory "/home/dokku/#{app_name}" do
+      owner 'dokku'
+      group 'dokku'
     end
 
     if app_env = config['env']
-      file "/home/git/#{app_name}/ENV" do
-        owner  'git'
-        group  'git'
+      file "/home/dokku/#{app_name}/ENV" do
+        owner  'dokku'
+        group  'dokku'
         action :create_if_missing
       end
 
       app_env.each do |var, value|
         # TODO: Remove old export before writing
         export = "export #{var}='#{value}'"
-        execute "echo \"#{export}\" >> /home/git/#{app_name}/ENV" do
-          user   'git'
-          not_if { ::File.read("/home/git/#{app_name}/ENV") =~ /#{Regexp.escape value}/ }
+        execute "echo \"#{export}\" >> /home/dokku/#{app_name}/ENV" do
+          user   'dokku'
+          not_if { ::File.read("/home/dokku/#{app_name}/ENV") =~ /#{Regexp.escape value}/ }
         end
       end
     end
