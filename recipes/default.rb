@@ -7,7 +7,7 @@ package 'apt-transport-https'
 install_env = { 'STACK_URL' => node['dokku']['stack_url'] }
 execute "install_dokku" do
   # TODO: Split change to remote file + execute
-  command "wget -qO- https://raw.github.com/progrium/dokku/master/bootstrap.sh | bash"
+  command "wget -qO- https://raw.github.com/imanel/dokku/master/bootstrap.sh | bash"
   environment (install_env)
   not_if { ::File.exists?("/home/git") }
 end
